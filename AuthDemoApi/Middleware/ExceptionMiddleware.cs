@@ -1,0 +1,33 @@
+﻿using Microsoft.AspNetCore.Http;
+using Serilog;
+using System.Net;
+using System;
+using System.Threading.Tasks;
+
+namespace AuthDemoApi.Middleware
+{
+    public class ExceptionMiddleware
+    {
+        private readonly RequestDelegate _next;
+
+        public ExceptionMiddleware(RequestDelegate next)
+        {
+                _next = next;
+        }
+        public async Task InvokeAsync(HttpContext context)
+        {
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Unhandled exception");
+
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+                await context.Response.WriteAsync("Internal Server Error");
+            }
+        }
+    }
+}
